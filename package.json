@@ -1,0 +1,28 @@
+{
+  "name": "duckerdbg",
+  "version": "0.0.1",
+  "description": "Simple console debugger for simple applications",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a01334390/ducker.git"
+  },
+  "keywords": [
+    "debug",
+    "testing",
+    "duck"
+  ],
+  "author": "Fernando Martin Garcia Del Angel",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/a01334390/ducker/issues"
+  },
+  "homepage": "https://github.com/a01334390/ducker#readme",
+  "dependencies": {
+    "clone": "^2.1.2",
+    "stacktrace-js": "^2.0.1"
+  }
+}
