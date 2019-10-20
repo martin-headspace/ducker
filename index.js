@@ -22,6 +22,7 @@
 const StackTrace = require('stacktrace-js')
 const clone = require('clone')
 const faker = require('faker')
+const ErrorParser = require('error-stack-parser')
 const chalk = require('chalk')
 
 /**
@@ -37,8 +38,7 @@ const QUACK = '🦆 {Quack}'
  * @param {boolean}     detailed    Prints the complete stack trace 
  */
 function quack(word = '', debug = false, level = 2, detailed = false) {
-    var stack = StackTrace.getSync()
-    console.log(QUACK+' > '+(!word ? quack.caller.name : word))
+    console.log(QUACK+' > '+chalk.yellow(!word ? quack.caller.name : word))
     if (debug) {
         printStack(level, detailed)
     }
@@ -70,28 +70,33 @@ function printStack(level, detailed) {
  * @param {any} value Value tested for being truthy 
  */
 function check(value) {
-    console.log(QUACK)
     let type = ''
-    console.log('This value is of type %s', typeof value)
+    console.log('This value is of type '+chalk.blue(typeof value))
     console.group()
     switch (typeof value) {
-        case 'number':
-            console.log('-> Its value is %f', value)
+        case 'number': case 'string' :
+            console.log('-> Its value is '+chalk.green(value))
             break
         case 'object':
             if (isEmpty(value)) {
-                console.log('-> Its value is empty')
+                console.log('-> Its value is '+chalk.red('empty'))
             } else {
                 if (value[0] == undefined) {
                     console.table(xray(value))
                 } else {
-                    console.log('-> Array type. First value structure:')
-                    console.table(xray(value[0]))
+                    console.log('->'+chalk.yellow(' Array type '))                    
+                    for(val in value){
+                        console.group(chalk.magenta('Arr['+val+']'))
+                        check(value[val])
+                        console.groupEnd(chalk.magenta('Arr['+val+']'))
+                    }
                 }
             }
             break
         case 'boolean':
-            console.log('-> Its value is %s', value == null ? 'null' : value.toString())
+            console.log('-> Its value is '+ chalk.blue(value == null ? 'null' : value.toString()))
+            break
+
     }
     console.groupEnd()
 }
@@ -213,8 +218,8 @@ function xray(obj) {
     for (var key in obj) {
         cats.push({
             Key: key,
-            Type: obj[key],
-            Value: typeof obj[key]
+            Value: obj[key],
+            Type: typeof obj[key]
         })
     }
     return cats
@@ -287,6 +292,44 @@ function fake(schema) {
     return fak
 }
 
+/**
+ * Creates a link to stackoverflow based on an error
+ * @param {Error} error Error to convert 
+ */
+function stackoverflow(error){
+    console.log(QUACK)
+    if(error.message) {
+        var xcb = searchable(error.message)
+        console.log(chalk.yellow('Check on SO for Error > '+error.message))
+        console.log(chalk.blue(xcb))
+    } else {
+        console.log(chalk.red('Error message not present'))
+    }
+}
+
+/**
+ * Modifies a string to be searchable on search motors
+ * @param {String} query Natural language sentence to be converted 
+ * @param {String} website Website to search
+ * @returns {String} Link to the desired website
+ */
+function searchable(query,website='stackoverflow') {
+    const websites = {
+        stackoverflow : "http://stackoverflow.com/search?q=[js]+",
+        google: "http://www.google.com/search?q=",
+        youtube: 'https://www.youtube.com/results?search_query=',
+        duckduckgo: 'https://duckduckgo.com/?q=',
+        bing : 'https://www.bing.com/search?q=',
+        yahoo: 'https://mx.search.yahoo.com/search?p='
+    }
+    if(query) {
+        return websites[website]+query.split(" ").map(word => word.toLowerCase()).join('+')
+    } else {
+        return query
+    }
+}
+
+
 module.exports = {
     quack,
     check,
@@ -296,5 +339,7 @@ module.exports = {
     rename,
     xray,
     random,
-    fake
+    fake,
+    stackoverflow,
+    searchable
 }
