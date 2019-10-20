@@ -1,6 +1,6 @@
 {
   "name": "duckerdbg",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Simple console debugger for simple applications",
   "main": "index.js",
   "scripts": {
