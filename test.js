@@ -15,28 +15,27 @@ async function mult (a,b) {
 //     ducker.stackoverflow(e)
 // }
 
-console.log(ducker.searchable('Amazing thing you got there baby','bing'))
+console.log(ducker.searchable('Another one biTEs tHe duST','youtube'))
 // sum(1,2)
 // ducker.check([1,2,['wow',true,[{'a' : 2}]]])
 // ducker.stackoverflow(new RangeError())
 
+// ducker.go()
+// ducker.check([1,2,['wow',true,[{'a' : 2}]]])
+// ducker.stop()
 
-// ducker.test(mult,[2,2],4,true)
-// ducker.quack('',true,-1)
+// console.table(ducker.xray({ 'name' : 'Johny', 'age': 23}))
+// console.log(ducker.random(true,4,10))
+// ducker.fake({name: 'name'})
+// ducker.check(4)
+// ducker.test(sum,[2,2],2)
+// ducker.quack('wow',true,3)
 // console.log(ducker.random(false,5,6))
 // console.log(ducker.fake({
 //     name: 'name',
 //     email: 'email',
 //     username: 'username',
 //     email: 'email',
-//     address: 'address',
-//     phone: 'phone',
-//     website: 'website',
-//     birthday: 'dob',
-//     avatar: 'avatar',
-//     age: 'age',
-//     type: 'job',
-//     word: 'word',
 //     sentence: 'sentence',
 //     paragraphs: 'paragraphs',
 //     bloodT: 'blood',

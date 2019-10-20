@@ -128,21 +128,21 @@ function stop(group = QUACK) {
  */
 async function test(testable, args, expectedResult, debug = false, level = 3, detailed = false) {
     console.log(QUACK)
-    console.log('Function name: ' + testable.name)
+    console.log('Function name: ' + chalk.cyan(testable.name))
     console.group('--Result')
     let result
     switch (testable.constructor.name) {
         case 'Function':
             result = testable(...args)
-            console.log('Function Result: ' + result)
-            console.log('Expected Result: ' + expectedResult)
-            console.log(result === expectedResult ? 'Test successful!' : 'Test failed!')
+            console.log('Function Result: ' + chalk.yellow(result))
+            console.log('Expected Result: ' + chalk.yellow(expectedResult))
+            console.log(result === expectedResult ? chalk.green('Test successful!') : chalk.red('Test failed!'))
             break
         case 'AsyncFunction':
             result = await testable(...args)
-            console.log('Function Result: ' + result)
-            console.log('Expected Result: ' + expectedResult)
-            console.log(result === expectedResult ? 'Test successful!' : 'Test failed!')
+            console.log('Function Result: ' + chalk.yellow(result))
+            console.log('Expected Result: ' + chalk.yellow(expectedResult))
+            console.log(result === expectedResult ? chalk.green('Test successful!') : chalk.red('Test failed!'))
             break
         default:
             console.log('dedault')
@@ -251,7 +251,7 @@ function fake(schema) {
             fak[key] = fake(schema[key])
         } else {
             switch (schema[key]) {
-                case 'age':
+                case 'age': case 'number' :
                     fak[key] = random(false, 18, 100)
                     break
                 case 'job':
