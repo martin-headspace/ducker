@@ -1,5 +1,5 @@
-                                                                   
-                                                                   
+
+
 //     ,---,                                  ,-.                     
 //     .'  .' `\                            ,--/ /|                     
 //   ,---.'     \          ,--,           ,--. :/ |             __  ,-. 
@@ -16,21 +16,31 @@
 // Built by: Fernando Martin Garcia Del Angel
 // Built because I was bored
 
+/**
+ * Libraries to use
+ */
 const StackTrace = require('stacktrace-js')
-const utils = require('./utilities/utils')
+const clone = require('clone')
+const faker = require('faker')
+const chalk = require('chalk')
+
+/**
+ * Quack
+ */
 const QUACK = '🦆 {Quack}'
 
 /**
  * Quacks!
- * @param {string}      group       Counts from a custom group
+ * @param {string}      word        Word or Group to be Quacked
  * @param {boolean}     debug       Prints the stack or not
  * @param {number}      level       Number of leves of stack to print
  * @param {boolean}     detailed    Prints the complete stack trace 
  */
-function quack(group = QUACK, debug = false, level = 2, detailed = false) {
-    console.count(group)
-    if(debug) {
-        printStack(level,detailed)
+function quack(word = '', debug = false, level = 2, detailed = false) {
+    var stack = StackTrace.getSync()
+    console.log(QUACK+' > '+(!word ? quack.caller.name : word))
+    if (debug) {
+        printStack(level, detailed)
     }
 }
 
@@ -39,18 +49,20 @@ function quack(group = QUACK, debug = false, level = 2, detailed = false) {
  * @param {number}  level    level of depth to print on the stack
  * @param {boolean} detailed prints the source or not
  */
-function printStack(level,detailed) {
-    var stack = StackTrace.getSync().slice(0,level)
-    for(var i = 0; i < stack.length; i++) {
-        stack[i] = utils.renameKeys(stack[i],{
-            columnNumber: 'column',
-            lineNumber: 'line',
-        })
-        if (!detailed) {
-            delete stack[i].source
+function printStack(level, detailed) {
+    if (level) {
+        var stack = StackTrace.getSync().slice(0, level)
+        for (var i = 0; i < stack.length; i++) {
+            stack[i] = rename(stack[i], {
+                columnNumber: 'column',
+                lineNumber: 'line',
+            })
+            if (!detailed) {
+                delete stack[i].source
+            }
         }
+        console.table(stack)
     }
-    console.table(stack)
 }
 
 /**
@@ -60,26 +72,26 @@ function printStack(level,detailed) {
 function check(value) {
     console.log(QUACK)
     let type = ''
-    console.log('This value is of type %s',typeof value)
+    console.log('This value is of type %s', typeof value)
     console.group()
-    switch(typeof value) {
-        case 'number' :
-            console.log('-> Its value is %f',value)
+    switch (typeof value) {
+        case 'number':
+            console.log('-> Its value is %f', value)
             break
-        case 'object' :
-            if(utils.isEmpty(value)) {
+        case 'object':
+            if (isEmpty(value)) {
                 console.log('-> Its value is empty')
             } else {
                 if (value[0] == undefined) {
-                    categorizer(value)
+                    console.table(xray(value))
                 } else {
                     console.log('-> Array type. First value structure:')
-                    categorizer(value[0])
+                    console.table(xray(value[0]))
                 }
             }
             break
-        case 'boolean' :
-            console.log('-> Its value is %s',value == null ? 'null' : value.toString())
+        case 'boolean':
+            console.log('-> Its value is %s', value == null ? 'null' : value.toString())
     }
     console.groupEnd()
 }
@@ -107,50 +119,172 @@ function stop(group = QUACK) {
  * @param {any} expectedResult Expected result 
  * @param {boolean} debug Flag to determine if the stack should be printed
  * @param {number} level Level of detail of the stack
- * @param {flag} detailed Flag to determine if all data from the stack should be printed 
+ * @param {flag} detailed Flag to determine if all data from the stack should be printed
  */
-async function test(testable,args,expectedResult, debug = false, level = 3, detailed = false) {
+async function test(testable, args, expectedResult, debug = false, level = 3, detailed = false) {
     console.log(QUACK)
-    console.log('Function name: '+testable.name)
+    console.log('Function name: ' + testable.name)
     console.group('--Result')
     let result
-    switch(testable.constructor.name) {
-        case 'Function' :
+    switch (testable.constructor.name) {
+        case 'Function':
             result = testable(...args)
-            console.log('Function Result: '+result)
-            console.log('Expected Result: '+expectedResult)
+            console.log('Function Result: ' + result)
+            console.log('Expected Result: ' + expectedResult)
             console.log(result === expectedResult ? 'Test successful!' : 'Test failed!')
             break
-        case 'AsyncFunction' :
+        case 'AsyncFunction':
             result = await testable(...args)
-            console.log('Function Result: '+result)
-            console.log('Expected Result: '+expectedResult)
+            console.log('Function Result: ' + result)
+            console.log('Expected Result: ' + expectedResult)
             console.log(result === expectedResult ? 'Test successful!' : 'Test failed!')
             break
-        default :
+        default:
             console.log('dedault')
             break
     }
-    if(debug) {
-        printStack(level,detailed)
+    if (debug) {
+        printStack(level, detailed)
     }
     console.groupEnd('--Result')
 }
 
 /**
- * Categorizes JSON elements
- * @param {Object} obj Object element
+ * Renames the keys of a given object
+ * @param {Object} object Object whose keys will be changed (ex. {'a': 2})
+ * @param {Object} changes Object that maps the required changes (ex. {a: 'b'}) => {'b':2
+ * @returns {Object} Modified object with the new keys
  */
-function categorizer(obj) {
+function rename(object, changes) {
+    if (!changes || typeof changes !== 'object') {
+        return object
+    }
+
+    if (Array.isArray(object)) {
+        const newArray = []
+        for (var i = 0; i < object.length; i++) {
+            newArray.push(rename(object[i], changes))
+        }
+        return newArray
+    } else {
+        if (typeof object !== 'object') {
+            return object
+        }
+        var copy = clone(object)
+
+        for (var key in changes) {
+            if (typeof changes[key] === 'object') {
+                if (copy.hasOwnProperty(key)) {
+                    copy[key] = rename(copy[key], changes[key])
+                    continue
+                }
+            }
+
+            if (copy.hasOwnProperty(key)) {
+                var temp = copy[key]
+                copy[changes[key]] = temp
+                delete copy[key]
+            }
+        }
+        return copy
+    }
+}
+
+/**
+ * Checks if an Object is Empty
+ * @param {Object} obj Object to check for emptyness
+ * @returns Flag to indicate if it's empty or not 
+ */
+function isEmpty(obj) {
+    for (var key in obj) {
+        if (obj.hasOwnProperty(key))
+            return false;
+    }
+    return true;
+}
+
+/**
+ * Categorizes JSON Elements into types and values
+ * @param {Object} obj Object to check
+ * @returns {Array} Array to be printed or checked
+ */
+function xray(obj) {
     var cats = []
     for (var key in obj) {
         cats.push({
-            Key   : key,
-            Type  : obj[key],
-            Value : typeof obj[key]
+            Key: key,
+            Type: obj[key],
+            Value: typeof obj[key]
         })
     }
-    console.table(cats)
+    return cats
+}
+
+/**
+ * Generates a random number
+ * @param {boolean} floating Flag to represent if desired value should be floating
+ * @param {number} min Minimum value to generate
+ * @param {number} max Maximum value to generate
+ * @returns Random number
+ */
+function random(floating = false, min = 0, max = Number.MAX_SAFE_INTEGER) {
+    let number = (Math.random() * (max - min)) + min
+    return !floating ? Math.floor(number) : number
+}
+
+/**
+ * Generates an Object to use on tests based on a given schema
+ * @param {Object} schema Schema and Data Type to use on the fake object (ex. {'name':name, 'age':number, 'engaged':boolean})
+ * @param {Number} amount Amount of fake Objects to create
+ * @returns Object with the required fake data
+ */
+function fake(schema) {
+    let fak = {}
+    let card = faker.helpers.contextualCard()
+    for (var key in schema) {
+        if (typeof schema[key] == 'object') {
+            fak[key] = fake(schema[key])
+        } else {
+            switch (schema[key]) {
+                case 'age':
+                    fak[key] = random(false, 18, 100)
+                    break
+                case 'job':
+                    fak[key] = faker.name.jobTitle()
+                    break
+                case 'blood':
+                    var bloodT = ['A', 'B', 'AB', 'O']
+                    var RH = ['+', '-']
+                    fak[key] = { 'type': bloodT[random(false, 0, bloodT.length)], 'rh': RH[random(false, 0, RH.length)] }
+                    break
+                case 'color':
+                    fak[key] = faker.commerce.color()
+                    break
+                case 'ip' :
+                    fak[key] = faker.internet.ip()
+                    break
+                case 'password': 
+                    fak[key] = faker.internet.password()
+                    break
+                case 'title' :
+                    fak[key] = faker.name.title
+                    break
+                case 'word' :
+                    fak[key] = faker.lorem.word()
+                    break
+                case 'sentence' :
+                    fak[key] = faker.lorem.sentence()
+                    break
+                case 'paragraphs' :
+                    fak[key] = faker.lorem.paragraphs(3)
+                    break
+                default :
+                    fak[key] = card[schema[key]]
+                    break
+            }
+        }
+    }
+    return fak
 }
 
 module.exports = {
@@ -158,5 +292,9 @@ module.exports = {
     check,
     go,
     stop,
-    test
+    test,
+    rename,
+    xray,
+    random,
+    fake
 }

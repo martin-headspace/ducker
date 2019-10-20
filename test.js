@@ -1,27 +1,38 @@
 const ducker = require('./index')
 
 function sum (a,b) {
+    ducker.quack()
     return a + b
 }
 
 async function mult (a,b) {
+    ducker.quack('',true)
     return await a * b
 }
 
-ducker.go()
-    ducker.quack([{ 'a': 1 }, { 'a': 2 }])
-    ducker.quack('wow', true)
-    ducker.check(2)
-    ducker.check({ 'a': 2, 'b': 4 })
-    ducker.check([{ 'a': 2, 'b': 4 }, { 'a': 2, 'b': 4 }])
-    ducker.check([])
-    ducker.check(false)
-    ducker.check(null)
-    ducker.quack()
-    ducker.quack()
-    ducker.quack()
-    ducker.quack()
-    ducker.test(sum,[1,2],3)
-    ducker.test(mult,[2,5],3,true)
-ducker.stop()
-
+mult(5,4)
+sum(1,2)
+// ducker.quack('',true,-1)
+// console.log(ducker.random(false,5,6))
+// console.log(ducker.fake({
+//     name: 'name',
+//     email: 'email',
+//     username: 'username',
+//     email: 'email',
+//     address: 'address',
+//     phone: 'phone',
+//     website: 'website',
+//     birthday: 'dob',
+//     avatar: 'avatar',
+//     age: 'age',
+//     type: 'job',
+//     word: 'word',
+//     sentence: 'sentence',
+//     paragraphs: 'paragraphs',
+//     bloodT: 'blood',
+//     color: 'color',
+//     person : {
+//          name : 'name',
+//          age: 'age',
+//     }
+// }))

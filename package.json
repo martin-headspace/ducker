@@ -22,7 +22,9 @@
   },
   "homepage": "https://github.com/a01334390/ducker#readme",
   "dependencies": {
+    "chalk": "^2.4.2",
     "clone": "^2.1.2",
+    "faker": "^4.1.0",
     "stacktrace-js": "^2.0.1"
   }
 }
